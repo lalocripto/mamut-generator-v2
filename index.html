@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mamut Generator v2 by EC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .brand-yellow { background-color: #FFC738; }
+        .brand-yellow-text { color: #FFC738; }
+        .brand-black { background-color: #1A1A1A; }
+        .brand-gray { background-color: #F5F5F5; }
+        .hover-yellow:hover { background-color: #FFD55F; }
+        .content-card { transition: all 0.3s ease; border: 2px solid transparent; }
+        .content-card:hover { border-color: #FFC738; transform: translateY(-2px); box-shadow: 0 10px 25px rgba(255, 199, 56, 0.2); }
+        .content-card.selected { border-color: #FFC738; background-color: #FFFBF0; }
+        .progress-bar { transition: width 0.5s ease; }
+        .tab-active { background-color: #FFC738; color: #1A1A1A; }
+        .tab-inactive { background-color: transparent; color: #9CA3AF; }
+        .tab-inactive:hover { background-color: rgba(255, 199, 56, 0.1); color: #FFC738; }
+        .news-item { transition: all 0.2s ease; }
+        .news-item:hover { background-color: #FFFBF0; }
+        .news-item.selected { background-color: #FFF3D6; border-left: 4px solid #FFC738; }
+    </style>
+</head>
+<body class="brand-gray min-h-screen">
+
+    <!-- Header -->
+    <header class="brand-black text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center space-x-4">
+                    <div class="brand-yellow rounded-full w-12 h-12 flex items-center justify-center text-2xl">🦣</div>
+                    <div>
+                        <h1 class="text-2xl font-bold">Mamut Generator <span class="text-sm bg-yellow-400 text-black px-2 py-0.5 rounded">v2</span></h1>
+                        <p class="text-sm brand-yellow-text">by EC</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4 flex-wrap gap-2">
+                    <!-- API Key -->
+                    <div class="flex items-center space-x-2">
+                        <label for="claudeApiKey" class="text-xs text-gray-300">🔑 Claude:</label>
+                        <input type="password" id="claudeApiKey" placeholder="sk-ant-..."
+                            class="px-3 py-1.5 bg-gray-800 text-white rounded-lg text-xs border-2 border-gray-700 focus:border-yellow-400 transition-all w-48" />
+                        <button id="toggleClaudeKey" class="text-gray-400 hover:text-white transition-all text-xs">👁️</button>
+                    </div>
+                    <!-- Main Tabs -->
+                    <div class="flex space-x-2">
+                        <button id="tabContenido" class="tab-active px-4 py-2 rounded-lg font-medium transition-all">📤 Contenido</button>
+                        <button id="tabNewsletter" class="tab-inactive px-4 py-2 rounded-lg font-medium transition-all">📰 Newsletter</button>
+                        <button id="tabVoz" class="tab-inactive px-4 py-2 rounded-lg font-medium transition-all">🎯 Voz</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ==================== TAB: CONTENIDO ==================== -->
+        <div id="contenidoTab">
+            <div class="mb-8">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Paso <span id="currentStepText">1</span> de 3</span>
+                    <span class="text-sm font-bold brand-yellow-text"><span id="progressPercent">33</span>%</span>
+                </div>
+                <div class="h-3 bg-gray-300 rounded-full overflow-hidden">
+                    <div id="progressBar" class="progress-bar h-full brand-yellow" style="width: 33%"></div>
+                </div>
+            </div>
+
+            <!-- Step 1 -->
+            <div id="step1">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Paso 1: Sube tu Transcript</h2>
+                    <p class="text-gray-600 text-center mb-8">Sube el archivo o pega el texto</p>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">📁 Subir archivo (.txt, .md)</label>
+                        <div class="border-3 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-yellow-400 transition-all">
+                            <input type="file" id="fileInput" accept=".txt,.md" class="hidden" />
+                            <button onclick="document.getElementById('fileInput').click()" class="brand-yellow px-6 py-3 rounded-lg font-medium hover-yellow transition-all">Seleccionar Archivo</button>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">✍️ O pega el texto aquí</label>
+                        <textarea id="transcriptInput" rows="10" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-400 transition-all resize-none" placeholder="Pega el transcript (mínimo 100 caracteres)..."></textarea>
+                        <div class="flex justify-between items-center mt-2">
+                            <p id="charCount" class="text-sm text-gray-500">0 caracteres</p>
+                            <p class="text-xs text-gray-400">Mínimo: 100</p>
+                        </div>
+                    </div>
+                    <button id="step1Next" disabled class="w-full py-4 rounded-xl font-bold text-lg transition-all disabled:bg-gray-300 disabled:cursor-not-allowed enabled:brand-yellow enabled:hover-yellow">Continuar →</button>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div id="step2" class="hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Paso 2: Selecciona Formatos</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                        <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="newsletter"><div class="text-4xl mb-3">📰</div><h3 class="font-bold text-lg mb-2">Newsletter Semanal</h3><p class="text-sm text-gray-600">Estilo "Navegando"</p></div>
+                        <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="twitter-thread"><div class="text-4xl mb-3">🧵</div><h3 class="font-bold text-lg mb-2">Hilo de Twitter/X</h3><p class="text-sm text-gray-600">Thread viral 5-10 tweets</p></div>
+                        <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="twitter-post"><div class="text-4xl mb-3">𝕏</div><h3 class="font-bold text-lg mb-2">Posts de Twitter/X</h3><p class="text-sm text-gray-600">Posts únicos</p><div class="mt-3 hidden twitter-quantity-selector"><label class="text-xs">Cantidad:</label><input type="number" id="twitterPostQuantity" min="1" max="10" value="3" class="mt-1 w-full px-3 py-2 border-2 border-gray-200 rounded-lg text-sm" /></div></div>
+                        <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="linkedin"><div class="text-4xl mb-3">💼</div><h3 class="font-bold text-lg mb-2">Post de LinkedIn</h3><p class="text-sm text-gray-600">Profesional con análisis</p></div>
+                        <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="blog-seo"><div class="text-4xl mb-3">📝</div><h3 class="font-bold text-lg mb-2">Artículo Blog SEO</h3><p class="text-sm text-gray-600">Texto + HTML</p></div>
+                        <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="telegram"><div class="text-4xl mb-3">✈️</div><h3 class="font-bold text-lg mb-2">Mensaje Telegram</h3><p class="text-sm text-gray-600">Para comunidad</p></div>
+                        <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="video-clips"><div class="text-4xl mb-3">🎬</div><h3 class="font-bold text-lg mb-2">Sugerencias Clips</h3><p class="text-sm text-gray-600">5 clips con hooks</p></div>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button id="step2Back" class="flex-1 py-4 bg-gray-200 rounded-xl font-bold text-lg hover:bg-gray-300 transition-all">← Atrás</button>
+                        <button id="step2Generate" disabled class="flex-1 py-4 rounded-xl font-bold text-lg transition-all disabled:bg-gray-300 disabled:cursor-not-allowed enabled:brand-yellow enabled:hover-yellow">🚀 Generar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div id="step3" class="hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <div id="loadingState">
+                        <div class="text-center py-12">
+                            <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-yellow-400 border-t-transparent"></div>
+                            <p class="text-xl font-bold text-gray-900 mt-6">Generando contenido...</p>
+                            <p class="text-gray-600 mt-2">30-60 segundos</p>
+                        </div>
+                    </div>
+                    <div id="resultsContainer" class="hidden">
+                        <div class="flex justify-between items-center mb-8">
+                            <h2 class="text-3xl font-bold text-gray-900">✨ Contenido Generado</h2>
+                            <button id="resetButton" class="px-6 py-3 bg-gray-200 rounded-lg font-medium hover:bg-gray-300 transition-all">🔄 Nuevo</button>
+                        </div>
+                        <div id="contentResults" class="space-y-6"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB: NEWSLETTER ==================== -->
+        <div id="newsletterTab" class="hidden">
+
+            <!-- Step NL1: Buscar Noticias -->
+            <div id="nlStep1">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">📰 Generador de Newsletter</h2>
+                    <p class="text-gray-600 text-center mb-8">Busca noticias automáticamente y genera tu newsletter</p>
+
+                    <!-- Date Range -->
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📅 Fecha inicio</label>
+                            <input type="date" id="nlStartDate" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-400" />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">📅 Fecha fin</label>
+                            <input type="date" id="nlEndDate" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-400" />
+                        </div>
+                    </div>
+
+                    <!-- Manual URLs -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">📎 URLs manuales (opcional)</label>
+                        <textarea id="nlManualUrls" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-400 resize-none" placeholder="Pega URLs de noticias (una por línea)..."></textarea>
+                    </div>
+
+                    <button id="nlSearchBtn" class="w-full py-4 brand-yellow rounded-xl font-bold text-lg hover-yellow transition-all">🔍 Buscar Noticias</button>
+                </div>
+            </div>
+
+            <!-- Step NL2: Select News -->
+            <div id="nlStep2" class="hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">📰 Selecciona Noticias (4-6)</h2>
+                        <span id="nlSelectedCount" class="text-sm bg-yellow-100 px-3 py-1 rounded-full">0 seleccionadas</span>
+                    </div>
+
+                    <div id="nlNewsList" class="space-y-3 mb-6 max-h-96 overflow-y-auto"></div>
+
+                    <div class="flex space-x-4">
+                        <button id="nlBackBtn" class="flex-1 py-4 bg-gray-200 rounded-xl font-bold text-lg hover:bg-gray-300 transition-all">← Atrás</button>
+                        <button id="nlGenerateBtn" disabled class="flex-1 py-4 rounded-xl font-bold text-lg transition-all disabled:bg-gray-300 disabled:cursor-not-allowed enabled:brand-yellow enabled:hover-yellow">✍️ Generar Newsletter</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step NL3: Results -->
+            <div id="nlStep3" class="hidden">
+                <div class="bg-white rounded-2xl shadow-xl p-8">
+                    <div id="nlLoadingState">
+                        <div class="text-center py-12">
+                            <div class="inline-block animate-spin rounded-full h-16 w-16 border-4 border-yellow-400 border-t-transparent"></div>
+                            <p class="text-xl font-bold text-gray-900 mt-6">Generando newsletter...</p>
+                            <p class="text-gray-600 mt-2">40-60 segundos</p>
+                        </div>
+                    </div>
+
+                    <div id="nlResultsContainer" class="hidden">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-900">✨ Newsletter Generado</h2>
+                            <button id="nlResetBtn" class="px-4 py-2 bg-gray-200 rounded-lg font-medium hover:bg-gray-300">🔄 Nuevo</button>
+                        </div>
+
+                        <!-- Substack Ready Output -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-bold text-lg">📋 Listo para Substack</h3>
+                                <button id="nlCopySubstack" class="px-4 py-2 bg-gray-100 rounded-lg font-medium hover:bg-gray-200">📋 Copiar</button>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-4 border-2 border-gray-100 max-h-96 overflow-y-auto">
+                                <pre id="nlSubstackContent" class="whitespace-pre-wrap text-gray-800 leading-relaxed text-sm"></pre>
+                            </div>
+                        </div>
+
+                        <!-- HTML Output -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-bold text-lg">🌐 HTML para Webflow</h3>
+                                <button id="nlCopyHtml" class="px-4 py-2 bg-gray-100 rounded-lg font-medium hover:bg-gray-200">📋 Copiar HTML</button>
+                            </div>
+                            <div class="bg-gray-50 rounded-xl p-4 border-2 border-gray-100 max-h-48 overflow-y-auto">
+                                <pre id="nlHtmlContent" class="whitespace-pre-wrap text-gray-800 leading-relaxed text-xs"></pre>
+                            </div>
+                        </div>
+
+                        <button id="nlDownloadBtn" class="w-full py-4 brand-yellow rounded-xl font-bold text-lg hover-yellow transition-all">💾 Descargar .md</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB: VOZ ==================== -->
+        <div id="vozTab" class="hidden">
+            <div class="bg-white rounded-2xl shadow-xl p-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-6">🎯 Guía de Voz - Espacio Cripto</h2>
+                <div class="space-y-6">
+                    <div class="bg-gray-50 p-6 rounded-xl border-l-4 border-yellow-400">
+                        <h3 class="font-bold text-lg mb-3">🎭 Personalidad</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li>• Conversacional y cercano</li>
+                            <li>• Entusiasta pero con datos</li>
+                            <li>• Mexicanismos sutiles: "órale", "chécalo"</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-xl border-l-4 border-yellow-400">
+                        <h3 class="font-bold text-lg mb-3">✍️ Estilo</h3>
+                        <ul class="space-y-2 text-gray-700">
+                            <li>• Párrafos cortos (2-3 líneas)</li>
+                            <li>• Frases de impacto solas</li>
+                            <li>• Preguntas retóricas</li>
+                        </ul>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-xl border-l-4 border-yellow-400">
+                        <h3 class="font-bold text-lg mb-3">💬 Frases Características</h3>
+                        <div class="space-y-2 text-gray-700 italic">
+                            <p>"Nos vamos a la luna. Pero, para eso, debes estar preparado."</p>
+                            <p>"Nada mal para una moneda mágica del internet."</p>
+                            <p>"¿Listos? 3,2,1 ¡Despegamos!"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ==================== STATE ====================
+        let claudeApiKey = '';
+        let currentStep = 1;
+        let transcript = '';
+        let selectedFormats = [];
+        let twitterPostQuantity = 3;
+
+        // Newsletter state
+        let nlNews = [];
+        let nlSelectedNews = [];
+
+        // ==================== INIT ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            loadApiKey();
+            initDates();
+            updateProgressBar();
+        });
+
+        function loadApiKey() {
+            claudeApiKey = localStorage.getItem('claudeApiKey') || '';
+            document.getElementById('claudeApiKey').value = claudeApiKey;
+        }
+
+        function initDates() {
+            const today = new Date();
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            document.getElementById('nlEndDate').value = today.toISOString().split('T')[0];
+            document.getElementById('nlStartDate').value = weekAgo.toISOString().split('T')[0];
+        }
+
+        // ==================== API KEY ====================
+        document.getElementById('claudeApiKey').addEventListener('input', (e) => {
+            claudeApiKey = e.target.value.trim();
+            if (claudeApiKey) {
+                localStorage.setItem('claudeApiKey', claudeApiKey);
+                if (claudeApiKey.startsWith('sk-ant-')) {
+                    alert('El API Key se pegó correctamente');
+                }
+            }
+        });
+
+        document.getElementById('toggleClaudeKey').addEventListener('click', () => {
+            const input = document.getElementById('claudeApiKey');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        });
+
+        // ==================== TAB SWITCHING ====================
+        document.getElementById('tabContenido').addEventListener('click', () => switchTab('contenido'));
+        document.getElementById('tabNewsletter').addEventListener('click', () => switchTab('newsletter'));
+        document.getElementById('tabVoz').addEventListener('click', () => switchTab('voz'));
+
+        function switchTab(tab) {
+            document.getElementById('contenidoTab').classList.toggle('hidden', tab !== 'contenido');
+            document.getElementById('newsletterTab').classList.toggle('hidden', tab !== 'newsletter');
+            document.getElementById('vozTab').classList.toggle('hidden', tab !== 'voz');
+
+            document.getElementById('tabContenido').className = tab === 'contenido' ? 'tab-active px-4 py-2 rounded-lg font-medium transition-all' : 'tab-inactive px-4 py-2 rounded-lg font-medium transition-all';
+            document.getElementById('tabNewsletter').className = tab === 'newsletter' ? 'tab-active px-4 py-2 rounded-lg font-medium transition-all' : 'tab-inactive px-4 py-2 rounded-lg font-medium transition-all';
+            document.getElementById('tabVoz').className = tab === 'voz' ? 'tab-active px-4 py-2 rounded-lg font-medium transition-all' : 'tab-inactive px-4 py-2 rounded-lg font-medium transition-all';
+        }
+
+        // ==================== CONTENIDO TAB ====================
+        const transcriptInput = document.getElementById('transcriptInput');
+        const fileInput = document.getElementById('fileInput');
+        const charCount = document.getElementById('charCount');
+        const step1Next = document.getElementById('step1Next');
+
+        transcriptInput.addEventListener('input', updateCharCount);
+        fileInput.addEventListener('change', handleFileUpload);
+
+        function updateCharCount() {
+            const count = transcriptInput.value.length;
+            charCount.textContent = `${count} caracteres`;
+            step1Next.disabled = count < 100;
+            transcript = transcriptInput.value;
+        }
+
+        async function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (file) {
+                transcriptInput.value = await file.text();
+                updateCharCount();
+            }
+        }
+
+        step1Next.addEventListener('click', () => { if (transcript.length >= 100) goToStep(2); });
+        document.getElementById('step2Back').addEventListener('click', () => goToStep(1));
+        document.getElementById('step2Generate').addEventListener('click', generateContent);
+        document.getElementById('resetButton').addEventListener('click', resetContenido);
+
+        document.getElementById('twitterPostQuantity').addEventListener('input', (e) => {
+            twitterPostQuantity = parseInt(e.target.value) || 3;
+        });
+
+        // Format selection
+        document.querySelectorAll('.content-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const format = card.dataset.format;
+                const isSelected = card.classList.contains('selected');
+
+                if (isSelected) {
+                    card.classList.remove('selected');
+                    selectedFormats = selectedFormats.filter(f => f !== format);
+                    card.querySelector('.checkmark')?.remove();
+                    if (format === 'twitter-post') card.querySelector('.twitter-quantity-selector').classList.add('hidden');
+                } else {
+                    card.classList.add('selected');
+                    selectedFormats.push(format);
+                    const checkmark = document.createElement('div');
+                    checkmark.className = 'checkmark absolute top-2 right-2 bg-yellow-400 text-black rounded-full w-8 h-8 flex items-center justify-center font-bold';
+                    checkmark.textContent = '✓';
+                    card.style.position = 'relative';
+                    card.appendChild(checkmark);
+                    if (format === 'twitter-post') card.querySelector('.twitter-quantity-selector').classList.remove('hidden');
+                }
+                document.getElementById('step2Generate').disabled = selectedFormats.length === 0;
+            });
+        });
+
+        function goToStep(step) {
+            currentStep = step;
+            document.getElementById('step1').classList.toggle('hidden', step !== 1);
+            document.getElementById('step2').classList.toggle('hidden', step !== 2);
+            document.getElementById('step3').classList.toggle('hidden', step !== 3);
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            const percent = (currentStep / 3) * 100;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+            document.getElementById('progressPercent').textContent = Math.round(percent);
+            document.getElementById('currentStepText').textContent = currentStep;
+        }
+
+        function resetContenido() {
+            currentStep = 1;
+            transcript = '';
+            selectedFormats = [];
+            transcriptInput.value = '';
+            updateCharCount();
+            document.querySelectorAll('.content-card').forEach(card => {
+                card.classList.remove('selected');
+                card.querySelector('.checkmark')?.remove();
+                card.querySelector('.twitter-quantity-selector')?.classList.add('hidden');
+            });
+            goToStep(1);
+        }
+
+        async function generateContent() {
+            if (!claudeApiKey || !claudeApiKey.startsWith('sk-ant-')) {
+                alert('⚠️ Ingresa tu API Key de Claude');
+                return;
+            }
+            goToStep(3);
+            document.getElementById('loadingState').classList.remove('hidden');
+            document.getElementById('resultsContainer').classList.add('hidden');
+
+            try {
+                const content = await generateContentWithAI();
+                displayResults(content);
+                document.getElementById('loadingState').classList.add('hidden');
+                document.getElementById('resultsContainer').classList.remove('hidden');
+            } catch (error) {
+                alert(`⚠️ Error: ${error.message}`);
+                goToStep(2);
+            }
+        }
+
+        async function generateContentWithAI() {
+            const formatDescriptions = {
+                'newsletter': 'Newsletter semanal estilo "Navegando"',
+                'twitter-thread': 'Thread de 5-10 tweets',
+                'twitter-post': `${twitterPostQuantity} posts de Twitter`,
+                'linkedin': 'Post de LinkedIn profesional',
+                'blog-seo': 'Artículo SEO: texto plano + HTML',
+                'video-clips': '5 sugerencias de clips',
+                'telegram': 'Mensaje para Telegram'
+            };
+
+            const formats = selectedFormats.map(f => `${f}: ${formatDescriptions[f]}`).join('\n');
+
+            const response = await fetch("/api/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    apiKey: claudeApiKey,
+                    model: "claude-sonnet-4-20250514",
+                    max_tokens: 16000,
+                    messages: [{
+                        role: "user",
+                        content: `Eres creador de contenido para Espacio Cripto. Genera contenido con tono conversacional, cercano, con emojis estratégicos. NUNCA uses Markdown (**, ##). Solo texto plano.
+
+FORMATOS:
+${formats}
+
+TRANSCRIPT:
+${transcript}
+
+SOLO genera los formatos solicitados arriba. Responde con JSON válido (sin backticks).
+
+Ejemplo de estructura (incluye SOLO las keys que te pedí):
+${selectedFormats.includes('newsletter') ? '"newsletter": "contenido",' : ''}
+${selectedFormats.includes('twitter-thread') ? '"twitter-thread": "contenido",' : ''}
+${selectedFormats.includes('twitter-post') ? '"twitter-post": ["post1", "post2", ...],' : ''}
+${selectedFormats.includes('linkedin') ? '"linkedin": "contenido",' : ''}
+${selectedFormats.includes('blog-seo') ? '"blog-seo-texto": "texto plano", "blog-seo-html": "HTML con h1, h2, p",' : ''}
+${selectedFormats.includes('video-clips') ? '"video-clips": "contenido",' : ''}
+${selectedFormats.includes('telegram') ? '"telegram": "contenido",' : ''}
+
+Responde SOLO con JSON.`
+                    }]
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error?.message || 'Error');
+
+            let text = data.content[0].text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+            const jsonMatch = text.match(/\{[\s\S]*\}/);
+            if (!jsonMatch) throw new Error('No JSON found');
+            return JSON.parse(jsonMatch[0]);
+        }
+
+        function displayResults(results) {
+            const container = document.getElementById('contentResults');
+            container.innerHTML = '';
+
+            const names = {
+                'newsletter': { name: 'Newsletter', icon: '📰' },
+                'twitter-thread': { name: 'Hilo Twitter', icon: '🧵' },
+                'twitter-post': { name: 'Posts Twitter', icon: '𝕏' },
+                'linkedin': { name: 'LinkedIn', icon: '💼' },
+                'blog-seo-texto': { name: 'Blog Texto', icon: '📝' },
+                'blog-seo-html': { name: 'Blog HTML', icon: '🌐' },
+                'video-clips': { name: 'Clips', icon: '🎬' },
+                'telegram': { name: 'Telegram', icon: '✈️' }
+            };
+
+            Object.entries(results).forEach(([format, content]) => {
+                if (!content || !names[format]) return;
+                let displayContent = Array.isArray(content) ? content.map((p, i) => `Post ${i+1}:\n${p}`).join('\n\n---\n\n') : content;
+
+                const div = document.createElement('div');
+                div.className = 'bg-white rounded-2xl shadow-xl p-6 mb-4 border-2 border-gray-100';
+                div.innerHTML = `
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold">${names[format].icon} ${names[format].name}</h3>
+                        <button class="copy-btn px-3 py-1 bg-gray-100 rounded-lg text-sm hover:bg-gray-200">📋 Copiar</button>
+                    </div>
+                    <pre class="bg-gray-50 rounded-xl p-4 whitespace-pre-wrap text-sm max-h-64 overflow-y-auto">${displayContent}</pre>
+                `;
+                div.querySelector('.copy-btn').addEventListener('click', async () => {
+                    await navigator.clipboard.writeText(displayContent);
+                    div.querySelector('.copy-btn').textContent = '✅ Copiado!';
+                    setTimeout(() => div.querySelector('.copy-btn').textContent = '📋 Copiar', 2000);
+                });
+                container.appendChild(div);
+            });
+        }
+
+        // ==================== NEWSLETTER TAB ====================
+        document.getElementById('nlSearchBtn').addEventListener('click', searchNews);
+        document.getElementById('nlBackBtn').addEventListener('click', () => nlGoToStep(1));
+        document.getElementById('nlGenerateBtn').addEventListener('click', generateNewsletter);
+        document.getElementById('nlResetBtn').addEventListener('click', () => nlGoToStep(1));
+        document.getElementById('nlCopySubstack').addEventListener('click', () => copyNlContent('substack'));
+        document.getElementById('nlCopyHtml').addEventListener('click', () => copyNlContent('html'));
+        document.getElementById('nlDownloadBtn').addEventListener('click', downloadNewsletter);
+
+        function nlGoToStep(step) {
+            document.getElementById('nlStep1').classList.toggle('hidden', step !== 1);
+            document.getElementById('nlStep2').classList.toggle('hidden', step !== 2);
+            document.getElementById('nlStep3').classList.toggle('hidden', step !== 3);
+        }
+
+        async function searchNews() {
+            const startDate = document.getElementById('nlStartDate').value;
+            const endDate = document.getElementById('nlEndDate').value;
+            const manualUrls = document.getElementById('nlManualUrls').value;
+
+            if (!startDate || !endDate) {
+                alert('Selecciona fechas');
+                return;
+            }
+
+            document.getElementById('nlSearchBtn').textContent = '🔍 Buscando...';
+            document.getElementById('nlSearchBtn').disabled = true;
+
+            try {
+                const response = await fetch("/api/news", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ startDate, endDate })
+                });
+
+                const data = await response.json();
+                nlNews = data.news || [];
+
+                // Add manual URLs
+                if (manualUrls.trim()) {
+                    const urls = manualUrls.split('\n').filter(u => u.trim());
+                    urls.forEach((url, i) => {
+                        nlNews.unshift({
+                            title: `Noticia manual ${i + 1}`,
+                            url: url.trim(),
+                            date: new Date().toISOString().split('T')[0],
+                            summary: 'URL agregada manualmente',
+                            source: 'Manual',
+                            isManual: true
+                        });
+                    });
+                }
+
+                if (nlNews.length === 0) {
+                    alert('No se encontraron noticias');
+                    return;
+                }
+
+                renderNewsList();
+                nlGoToStep(2);
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            } finally {
+                document.getElementById('nlSearchBtn').textContent = '🔍 Buscar Noticias';
+                document.getElementById('nlSearchBtn').disabled = false;
+            }
+        }
+
+        function renderNewsList() {
+            const container = document.getElementById('nlNewsList');
+            container.innerHTML = '';
+            nlSelectedNews = [];
+
+            nlNews.forEach((news, i) => {
+                const div = document.createElement('div');
+                div.className = 'news-item p-4 rounded-xl border-2 border-gray-100 cursor-pointer';
+                div.innerHTML = `
+                    <div class="flex items-start gap-3">
+                        <input type="checkbox" class="mt-1" ${i < 6 ? 'checked' : ''}>
+                        <div class="flex-1">
+                            <div class="font-bold text-sm">${news.isManual ? '✨ ' : ''}${news.title}</div>
+                            <div class="text-xs text-gray-500 mt-1">📅 ${news.date} | ${news.source}</div>
+                            <div class="text-xs text-gray-400 mt-1 truncate">${news.url}</div>
+                        </div>
+                    </div>
+                `;
+
+                const checkbox = div.querySelector('input');
+                if (i < 6) {
+                    nlSelectedNews.push(news);
+                    div.classList.add('selected');
+                }
+
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        nlSelectedNews.push(news);
+                        div.classList.add('selected');
+                    } else {
+                        nlSelectedNews = nlSelectedNews.filter(n => n !== news);
+                        div.classList.remove('selected');
+                    }
+                    updateNlCount();
+                });
+
+                div.addEventListener('click', (e) => {
+                    if (e.target !== checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        checkbox.dispatchEvent(new Event('change'));
+                    }
+                });
+
+                container.appendChild(div);
+            });
+
+            updateNlCount();
+        }
+
+        function updateNlCount() {
+            const count = nlSelectedNews.length;
+            document.getElementById('nlSelectedCount').textContent = `${count} seleccionadas`;
+            document.getElementById('nlGenerateBtn').disabled = count < 4 || count > 6;
+        }
+
+        async function generateNewsletter() {
+            if (!claudeApiKey || !claudeApiKey.startsWith('sk-ant-')) {
+                alert('⚠️ Ingresa tu API Key de Claude');
+                return;
+            }
+
+            nlGoToStep(3);
+            document.getElementById('nlLoadingState').classList.remove('hidden');
+            document.getElementById('nlResultsContainer').classList.add('hidden');
+
+            try {
+                const newsJson = JSON.stringify(nlSelectedNews, null, 2);
+                const today = new Date().toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+
+                const response = await fetch("/api/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        apiKey: claudeApiKey,
+                        model: "claude-sonnet-4-20250514",
+                        max_tokens: 8000,
+                        messages: [{
+                            role: "user",
+                            content: `Eres Lalo de Espacio Cripto. Genera un newsletter en español.
+
+VOZ: Conversacional, cercano. Usa "chécalo", "te comparto". Opiniones claras. NUNCA uses "yo pienso" o "personalmente". Habla en segunda persona.
+
+ESTRUCTURA:
+# Newsletter Espacio Cripto
+${today}
+
+¡Hola! Te escribe Lalo 🎯
+
+En el newsletter de hoy encontrarás:
+• [6-7 palabras max por bullet]
+• [Con acentos correctos]
+
+## 🦄 Uniswap México
+Si estás construyendo, invirtiendo, o aprendiendo de DeFi en México, no te pierdas el grupo de Uniswap México en Telegram.
+Entra: https://bit.ly/uniswap-n
+
+---
+
+## [EMOJI] [TÍTULO NOTICIA PRINCIPAL]
+[100-200 palabras]
+Fuente: [nombre] - [URL]
+
+---
+
+## [EMOJI] [TÍTULO NOTICIA 2]
+[60-200 palabras]
+Fuente: [nombre] - [URL]
+
+[Repite para 4-6 noticias]
+
+¡Eso es todo!
+Nos vemos ✌️
+- Lalo
+
+NOTICIAS:
+${newsJson}
+
+Responde con JSON:
+{
+  "substack": "newsletter completo en texto plano para Substack",
+  "html": "newsletter en HTML semántico"
+}`
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error?.message || 'Error');
+
+                let text = data.content[0].text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+                const jsonMatch = text.match(/\{[\s\S]*\}/);
+                if (!jsonMatch) throw new Error('No JSON');
+
+                const result = JSON.parse(jsonMatch[0]);
+
+                document.getElementById('nlSubstackContent').textContent = result.substack || 'Error generando';
+                document.getElementById('nlHtmlContent').textContent = result.html || 'Error generando';
+
+                document.getElementById('nlLoadingState').classList.add('hidden');
+                document.getElementById('nlResultsContainer').classList.remove('hidden');
+
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+                nlGoToStep(2);
+            }
+        }
+
+        async function copyNlContent(type) {
+            const content = type === 'substack'
+                ? document.getElementById('nlSubstackContent').textContent
+                : document.getElementById('nlHtmlContent').textContent;
+
+            await navigator.clipboard.writeText(content);
+            const btn = type === 'substack' ? document.getElementById('nlCopySubstack') : document.getElementById('nlCopyHtml');
+            btn.textContent = '✅ Copiado!';
+            setTimeout(() => btn.textContent = type === 'substack' ? '📋 Copiar' : '📋 Copiar HTML', 2000);
+        }
+
+        function downloadNewsletter() {
+            const content = document.getElementById('nlSubstackContent').textContent;
+            const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `newsletter_${new Date().toISOString().split('T')[0]}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
