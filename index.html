@@ -107,6 +107,7 @@
                         <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="blog-seo"><div class="text-4xl mb-3">📝</div><h3 class="font-bold text-lg mb-2">Artículo Blog SEO</h3><p class="text-sm text-gray-600">Texto + HTML</p></div>
                         <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="telegram"><div class="text-4xl mb-3">✈️</div><h3 class="font-bold text-lg mb-2">Mensaje Telegram</h3><p class="text-sm text-gray-600">Para comunidad</p></div>
                         <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="video-clips"><div class="text-4xl mb-3">🎬</div><h3 class="font-bold text-lg mb-2">Sugerencias Clips</h3><p class="text-sm text-gray-600">5 clips con hooks</p></div>
+                        <div class="content-card p-6 rounded-xl cursor-pointer bg-white" data-format="contenido-corto"><div class="text-4xl mb-3">📱</div><h3 class="font-bold text-lg mb-2">Contenido corto</h3><p class="text-sm text-gray-600">Guiones virales para Reels y TikTok</p></div>
                     </div>
                     <div class="flex space-x-4">
                         <button id="step2Back" class="flex-1 py-4 bg-gray-200 rounded-xl font-bold text-lg hover:bg-gray-300 transition-all">← Atrás</button>
@@ -442,7 +443,8 @@
                 'linkedin': 'Post de LinkedIn profesional',
                 'blog-seo': 'Artículo SEO: texto plano + HTML',
                 'video-clips': '5 sugerencias de clips',
-                'telegram': 'Mensaje para Telegram'
+                'telegram': 'Mensaje para Telegram',
+                'contenido-corto': 'Guion de video corto viral para Instagram Reels y TikTok (30-60 seg)'
             };
 
             const formats = selectedFormats.map(f => `${f}: ${formatDescriptions[f]}`).join('\n');
@@ -474,7 +476,16 @@ ${selectedFormats.includes('linkedin') ? '"linkedin": "contenido",' : ''}
 ${selectedFormats.includes('blog-seo') ? '"blog-seo-texto": "texto plano", "blog-seo-html": "HTML con h1, h2, p",' : ''}
 ${selectedFormats.includes('video-clips') ? '"video-clips": "contenido",' : ''}
 ${selectedFormats.includes('telegram') ? '"telegram": "contenido",' : ''}
+${selectedFormats.includes('contenido-corto') ? '"contenido-corto": "contenido",' : ''}
 
+${selectedFormats.includes('contenido-corto') ? `INSTRUCCIÓN ESPECIAL PARA "contenido-corto":
+Genera un guion de video corto viral (30-60 segundos) para Instagram Reels y TikTok. Estructura:
+- HOOK (primeros 3 seg): Frase impactante que detenga el scroll
+- DESARROLLO (20-40 seg): 3-4 puntos clave, lenguaje directo y simple
+- CTA (últimos 5 seg): Llamada a la acción clara (seguir, compartir, guardar)
+
+Basa el contenido principalmente en el conocimiento del PDF "EBOOK FORMULA 100K WORKBOOK" (estrategias de crecimiento en redes, contenido viral, monetización). El guion debe ser accionable, con frases cortas y ritmo rápido. Incluye indicaciones de edición entre corchetes [corte rápido], [zoom], [texto en pantalla].
+` : ''}
 Responde SOLO con JSON.`
                     }]
                 })
@@ -501,7 +512,8 @@ Responde SOLO con JSON.`
                 'blog-seo-texto': { name: 'Blog Texto', icon: '📝' },
                 'blog-seo-html': { name: 'Blog HTML', icon: '🌐' },
                 'video-clips': { name: 'Clips', icon: '🎬' },
-                'telegram': { name: 'Telegram', icon: '✈️' }
+                'telegram': { name: 'Telegram', icon: '✈️' },
+                'contenido-corto': { name: 'Contenido corto', icon: '📱' }
             };
 
             Object.entries(results).forEach(([format, content]) => {
